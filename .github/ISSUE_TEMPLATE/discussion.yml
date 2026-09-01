@@ -1,0 +1,37 @@
+name: "💬 需求釐清 / 跨部門討論"
+description: 當遇到規格模糊、需要跨團隊對焦時使用
+title: "[討論] "
+labels: ["discussion", "question"]
+body:
+  - type: input
+    id: project_folder
+    attributes:
+      label: 📂 關聯專案資料夾
+      description: 請指出討論的問題屬於哪一個專案資料夾
+      placeholder: "例如：Project-A-API-Docs"
+    validations:
+      required: true
+  - type: textarea
+    id: problem_description
+    attributes:
+      label: ❓ 問題描述
+      description: 目前遇到什麼不清楚或有衝突的地方？
+      placeholder: "請詳細描述目前的狀況..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 💡 目前想法 / 提案
+      description: 發起人自己建議的解決方向，例如 Option A / Option B
+      placeholder: "Option A: ...\nOption B: ..."
+    validations:
+      required: false
+  - type: input
+    id: decision_maker
+    attributes:
+      label: 🤝 需要誰來決策 / 協助
+      description: 請 Tag 相關的人員或團隊
+      placeholder: "例如：@Product-Team, @someone"
+    validations:
+      required: false

@@ -1,0 +1,77 @@
+name: "🚀 正式環境部署"
+description: 正式環境部署計畫 (Production Deployment)
+title: "[正式環境部署] "
+labels: ["production-deploy"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🚀 正式環境部署計畫 (Production Deployment)
+
+        請於 GitHub 側邊欄設定：
+        - **Start date**：部署當日
+        - **Target date**：部署當日
+
+  - type: input
+    id: deploy_date
+    attributes:
+      label: 預計執行日期
+      placeholder: "2026/--/--"
+    validations:
+      required: true
+
+  - type: input
+    id: deploy_window
+    attributes:
+      label: 預計維護／影響時間
+      placeholder: "--:-- ~ --:--（預估 ____ 分鐘）"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: maintenance_page
+    attributes:
+      label: 是否需要掛載維護公告畫面 (Maintenance Page)
+      options:
+        - 需要
+        - 不需要
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: predeploy_checklist
+    attributes:
+      label: 🛠️ 部署前置與準備工作 (Pre-deployment)
+      options:
+        - label: 已備份正式環境資料庫 (Database Backup)
+          required: true
+        - label: 已確認服務環境變數正確切換到 prod 環境
+          required: true
+        - label: 已確認第三方服務／API 狀態正常
+          required: true
+
+  - type: checkboxes
+    id: smoke_test_checklist
+    attributes:
+      label: 🧪 上線後關鍵驗收 (Smoke Testing)
+      description: 部署完成後，由 PM/CS 進行線上環境基本功能冒煙測試，確保沒改壞。
+      options:
+        - label: 核心主流程可正常開啟、操作
+          required: true
+        - label: 已檢查正式環境 Log，沒有異常 Error
+          required: true
+        - label: 已解除維護公告畫面，正式對外開放
+          required: true
+
+  - type: textarea
+    id: rollback_plan
+    attributes:
+      label: 🚨 復原計畫 (Rollback Plan)
+      description: 若部署發生無法當場解決的重大故障，超過 ____ 分鐘未排除，立即啟動復原。
+      value: |
+        - **復原觸發條件**：
+        - **復原步驟**：
+          1. 將資料庫還原至備份點：`[備份檔名/指令]`
+          2. 將程式碼版號退回 (Rollback) 至前一個穩定版本：`v______`
+    validations:
+      required: true

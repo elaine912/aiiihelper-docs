@@ -1,0 +1,4 @@
+interface:
+  display_name: "BRD PRD Kickoff HTML"
+  short_description: "從 BRD/PRD 產出起始會議 HTML 頁面"
+  default_prompt: "Use $brd-prd-kickoff-html to create a kickoff meeting HTML from the project BRD and PRD."

@@ -1,0 +1,53 @@
+name: "❄️ Code Freeze"
+description: 宣告版本進入程式碼凍結狀態
+title: "[Code Freeze] "
+labels: ["code-freeze"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### ❄️ Code Freeze
+
+        **目的**：由 CS/PM 或 Tech Lead 發起，宣告某個版本進入凍結狀態。此時除了緊急 Bug 修正 (Hotfix) 外，禁止任何新功能合併 (Merge)，確保版本穩定。
+
+        **時機**：大版本上線（功能多人協作、超過 20 個工作天），建議可與工程師確認是否要有此安排。
+
+        請於 GitHub 側邊欄設定：
+        - **Start date**：程式碼凍結開始日
+        - **Target date**：預計部署或解除凍結日
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### ❄️ 程式碼凍結公告 (Code Freeze Notice)
+
+        本專案即將進行版本發布，請開發團隊配合停止合併非關 Bug 修正的原始碼。
+
+  - type: input
+    id: deploy_time
+    attributes:
+      label: 預計部署時間
+      placeholder: "2026/--/-- (--:--)"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ### 📌 凍結期間規則 (Rules)
+
+        1. **嚴禁合併新功能**：所有 Feature Branch 暫停合併至 `main` 或 `release` 分支。
+        2. **僅限緊急修正**：只有針對本次 UAT／測試 發現的重大 Bug 才能進行 Merge。
+        3. **通知管道**：如有緊急修正，請在下方留言並 @ 負責工程師。
+
+  - type: checkboxes
+    id: freeze_checklist
+    attributes:
+      label: 📝 凍結期檢查清單 (Checklist)
+      options:
+        - label: 已在 Google Chat 等通訊軟體同步公告給所有開發者
+          required: true
+        - label: 所有本次 release 項目已經全數合併到 main 分支
+          required: true

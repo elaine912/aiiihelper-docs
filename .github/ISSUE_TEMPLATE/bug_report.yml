@@ -1,0 +1,78 @@
+name: "🐛 Bug 回報"
+description: 回報系統異常或錯誤行為
+title: "🐛 [Bug] "
+labels: ["dev-bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🐛 Bug 回報
+
+        建立後請記得在 GitHub 側邊欄設定 **Start date**（預計開始處理日）與 **Target date**（預計完成日）。
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 嚴重等級
+      description: |
+        | 等級 | 定義 | 範例 |
+        |------|------|------|
+        | P0 | 核心功能異常，影響 > 3 站台或資安事件 | 登入頁無法使用、推播大量異常 |
+        | P1 | 核心功能異常，影響 ≦ 3 站台 | 預約時間錯推播、短網址無法轉跳 |
+        | P2 | 核心周邊功能不可用，影響用戶體驗 | 數據無法顯示、預估人數錯誤、Banner 錯誤 |
+        | P3 | 周邊功能壞掉，輕微影響用戶體驗 | 搜尋無法使用、功能無法複製 |
+        | P4 | 周邊功能不可用，基本不影響正常使用 | 加入日期未更新、DB 資料錯誤未表現於 UI |
+        | P5 | 業務功能可用，不影響正常使用 | 文案不一致、極端值未防呆但可容忍 |
+      options:
+        - P0 - Critical
+        - P1 - High
+        - P2 - Medium
+        - P3 - Low
+        - P4 - Very Low
+        - P5 - Suggestion
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境資訊
+      description: 發生在哪個環境與站台
+      placeholder: |
+        環境：Stage / Production
+        SiteKey：（請填寫站台識別碼）
+    validations:
+      required: true
+
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 異常情境
+      description: 請描述當下的資料狀態與操作流程，越詳細越好
+      placeholder: |
+        1. 前置條件：（例如：已登入、已建立某筆資料...）
+        2. 操作步驟：
+           - Step 1 ...
+           - Step 2 ...
+           - Step 3 ...
+        3. 錯誤發生在何時
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 預期結果
+      description: 正常情況下應該發生什麼？
+      placeholder: 系統應成功發送通知並顯示成功訊息
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 實際結果
+      description: 實際上發生了什麼？（附上 error log、截圖尤佳）
+      placeholder: 畫面顯示 500 Internal Server Error，通知未送出
+    validations:
+      required: true

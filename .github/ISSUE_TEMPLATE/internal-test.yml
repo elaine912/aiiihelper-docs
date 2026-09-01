@@ -1,0 +1,116 @@
+name: "🧪 Internal Test"
+description: 內部測試（Internal Test）任務追蹤
+title: "[Internal Test] "
+labels: ["internal-test"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 🧪 Internal Test
+
+        建立後請記得在 GitHub 側邊欄設定 **Start date**（預計開始測試日）與 **Target date**（預計完成測試日）。
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: 測試目標與範圍
+      description: 由 CS／PM 填寫，讓測試人員快速理解本次任務，不需要複製完整 STD。
+      placeholder: |
+        請明確說明本次測試目的、操作入口、需要點擊的位置，以及涵蓋的功能或模組。詳細案例與驗收標準以 STD 文件為準。
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 測試環境與資料
+      description: 請指定測試環境，以及需要使用的測試角色、帳號或資料條件。若完整資訊已記錄於 STD，可填寫對應章節或文件連結。
+      placeholder: |
+        請指定測試環境，以及需要使用的測試角色、帳號或資料條件。若完整資訊已記錄於 STD，可填寫對應章節或文件連結。敏感資訊請依團隊既有方式保存。
+    validations:
+      required: true
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 不在本次測試範圍
+      description: 請列出本次不需驗證的功能、模組或情境，避免測試範圍認知不一致。若沒有排除項目，請填寫「無」。
+      placeholder: 無
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: schedule_check
+    attributes:
+      label: 建立時程確認
+      options:
+        - label: 已設定 GitHub Start date 與 Target date／End date
+          required: true
+        - label: 本 Issue 已於預計開始測試日前至少 10 個工作天建立
+          required: true
+        - label: 若未滿 10 個工作天，已事先與測試人員確認並取得同意
+          required: true
+
+  - type: checkboxes
+    id: process_check
+    attributes:
+      label: 測試流程確認
+      options:
+        - label: 測試前會在 Comment 提供 STD 文件連結
+          required: true
+        - label: 測試後會在 Comment 上傳 STD 測試結果 Markdown 檔案
+          required: true
+        - label: 測試後會在 Comment 提供 AI 測試結果摘要
+          required: true
+        - label: 若測試造成規格異動，相關 PR 會連結回此 Issue
+          required: true
+
+  - type: textarea
+    id: comment_templates
+    attributes:
+      label: 🛠️ Comment 回覆格式
+      description: 測試前／測試後請複製下方對應內容貼到 Comment 中填寫。STD 可以是 repo 內的 Markdown 或 HTML 文件連結。
+      value: |
+        測試前：
+        ```
+        ## 測試前確認
+
+        ### STD 文件
+        [STD 文件名稱](文件連結或 repo 路徑)
+
+        ### 補充事項
+        無／請填寫測試前需注意的事項
+        ```
+
+        測試後：
+        ```
+        ## 測試結果
+
+        ### STD 測試結果
+        請於此 Comment 上傳測試結果 Markdown 檔案。
+
+        ### AI 摘要
+        - 測試案例總數：
+        - 通過：
+        - 未通過：
+        - 未執行：
+        - 整體結論：
+        - 主要發現：
+        - 待處理事項：
+        - 是否涉及規格異動：是／否
+
+        ### 規格或程式異動
+        - BRD／PRD 修改 PR：無／PR 連結
+        - 程式修改 PR：無／PR 連結
+        ```
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ### 📌 測後異動規則
+
+        - **CS／PM**：若規格有異動，建立分支及 PR 修改 BRD／PRD，並讓 PR 指向此 Issue。
+        - **開發人員**：若程式需要配合異動，建立分支及 PR 修改程式，並讓 PR 指向此 Issue。
+        - Internal Test 階段發現的問題直接記錄在 STD 結果及本 Issue，不強制另開 Bug Issue。

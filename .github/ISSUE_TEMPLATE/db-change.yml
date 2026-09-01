@@ -1,0 +1,69 @@
+name: "🗄️ Prod DB 異動"
+description: 異動Prod DB時使用
+title: "[DB異動] "
+body:
+  - type: textarea
+    id: change_background
+    attributes:
+      label: 📋 異動背景
+      description: 請說明本次異動的背景與原因
+      placeholder: "請描述異動背景..."
+    validations:
+      required: true
+  - type: textarea
+    id: change_description
+    attributes:
+      label: 📝 異動說明
+      description: 請詳細說明異動的具體內容
+      placeholder: "請描述異動內容..."
+    validations:
+      required: true
+  - type: dropdown
+    id: cloud_service
+    attributes:
+      label: ☁️ 雲端服務
+      description: 請選擇本次異動的雲端服務
+      options:
+        - Mongo DB
+        - AWS DB
+        - Azure DB
+        - Firestore DB
+        - 其他
+    validations:
+      required: true
+  - type: input
+    id: cloud_service_other
+    attributes:
+      label: ☁️ 其他雲端服務（請說明）
+      description: 若上方選擇「其他」，請在此輸入雲端服務名稱
+      placeholder: "請輸入雲端服務名稱"
+    validations:
+      required: false
+  - type: textarea
+    id: execution_template
+    attributes:
+      label: 🛠️ PM / 工程師執行模板
+      description: 完成異動後，請複製下方內容貼到 Comment 中填寫本次異動的執行細節
+      value: |
+        ⚠️ 請記得提供異動前、異動後的DB欄位截圖或Excel ⚠️
+        完成異動後請複製下方內容，貼到 Comment 中填寫本次異動的執行細節：
+
+        ```
+        ### 預期異動 DB 欄位
+        （請填寫）
+
+        ### 異動方式
+        - [ ] 手動異動
+        - [ ] 腳本異動
+        - [ ] API 異動
+
+        ### 執行異動紀錄
+        （請填寫）
+
+        ### 異動時間
+        YYYY-MM-DD HH:mm
+        ```
+    validations:
+      required: false
+
+       

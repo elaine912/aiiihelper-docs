@@ -1,0 +1,162 @@
+name: "📋 external-test"
+description: 客戶／外部驗收測試任務追蹤
+title: "[external-test] "
+labels: ["external-test"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### 📋 外部測試
+
+        建立後請記得在 GitHub 側邊欄設定 **Start date**（預計開始測試日）與 **Target date**（預計完成日）。
+
+  - type: input
+    id: customer_participants
+    attributes:
+      label: 客戶測試參與人員
+    validations:
+      required: false
+
+  - type: input
+    id: customer_acceptor
+    attributes:
+      label: 客戶驗收代表
+    validations:
+      required: true
+
+  - type: input
+    id: actual_test_date
+    attributes:
+      label: 實際測試日期
+      description: 尚未測試可留空；測試後務必補填，方便追查該版本發生的問題
+      placeholder: YYYY-MM-DD
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_goal
+    attributes:
+      label: 🎯 本次驗收目標
+      description: |
+        請說明這次安排外部測試，希望客戶實際確認哪些能力或使用情境。建議使用可驗證的描述，例如：
+        「確認門市人員可從建立訂單、收款到取消訂單，獨立完成完整作業流程。」
+        避免只填寫：「確認功能正常」、「進行 UAT」。
+    validations:
+      required: true
+
+  - type: textarea
+    id: test_docs
+    attributes:
+      label: 📎 外部測試文件
+      description: 請提供預計使用的外部測試文件。文件應包含測試情境、操作步驟、預期結果及測試所需資料。
+      placeholder: |
+        外部測試文件連結／附件：
+    validations:
+      required: true
+
+  - type: textarea
+    id: reference_docs
+    attributes:
+      label: 其他參考文件
+      description: BRD、PRD、操作說明或既有問題清單
+      placeholder: 無
+    validations:
+      required: false
+
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: 🚫 不在本次測試範圍
+      description: 若沒有排除項目，請填寫「無」。
+      placeholder: 無
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: pre_test_check
+    attributes:
+      label: ☑️ 測試前確認
+      options:
+        - label: 已設定 GitHub Start date 與 Target date
+          required: true
+        - label: 已確認本次驗收目標與範圍
+          required: true
+        - label: 已提供外部測試文件
+          required: true
+        - label: 已確認客戶驗收代表
+          required: true
+
+  - type: textarea
+    id: closing_comment_template
+    attributes:
+      label: 🛠️ 測試後結案 Comment 範本
+      description: 測試後請複製下方內容貼到 Comment 中填寫本次驗收結論與後續處理。
+      value: |
+        ## 🏁 最終驗收結論
+
+        請擇一勾選：
+
+        - [ ] **🟢 准予上線（Approved）**
+          測試通過，沒有上線阻礙，客戶同意依時程發布。
+
+        - [ ] **🟡 條件式上線（Conditional Pass）**
+          客戶同意在指定條件完成後上線。
+
+        - [ ] **🔴 拒絕上線（Rejected）**
+          存在上線阻礙或未達驗收條件，需要修正並重新測試。
+
+        - **外部測試結果文件**：（請上傳結果 Markdown 或提供連結）
+        - **會議記錄／客戶回覆**：
+
+        ---
+
+        ## 🎯 測試結果摘要
+
+        <!-- 可由 AI 根據測試結果與會議記錄產生，再由 CS／PM 確認。 -->
+
+        - **本次驗收目標達成情況**：
+        - **已完成的主要流程**：
+        - **未完成或未驗證的範圍**：
+        - **主要問題**：
+        - **是否需要重測**：
+        - **整體結論**：
+
+        ---
+
+        ## 🛑 問題與後續修改
+
+        <!--
+        問題類型：
+        1. 上線阻礙：未修正不得上線
+        2. 上線前待修：不影響驗收，但承諾上線前完成
+        3. 規格異動：需要修改 BRD、PRD 或 STD
+        4. 後續優化：列入 Backlog，不影響本次上線
+        5. 操作或認知落差：需要調整說明文件、操作流程或教育訓練
+        -->
+
+        ### 🚨 上線阻礙
+
+        <!-- 若沒有上線阻礙，請填寫「無」。 -->
+
+        - [ ] 無
+        - [ ] 有，請說明：
+
+        ### 💡 後續優化
+
+        <!-- 不影響本次上線、可排入後續迭代的項目。 -->
+
+        - [ ] 無
+        - [ ] 有，請說明：
+
+        ---
+
+        ## 🔗 規格與程式異動
+
+        - **BRD／PRD 修改 PR**：無／連結
+        - **STD 或外部測試文件修改 PR**：無／連結
+        - **程式修改 PR**：無／連結
+        - **後續 Backlog**：無／連結
+
+        所有因本次外部測試產生的修改 PR，應指向此 Issue。
+    validations:
+      required: false
