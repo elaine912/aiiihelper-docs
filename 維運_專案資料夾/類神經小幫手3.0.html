@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>類神經小幫手 3.0 值日生指南</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #F4F7FA;
+            --surface: #FFFFFF;
+            --primary-royal: #2B5F9E;
+            --secondary-blue: #5B89BA;
+            --accent-sky: #A5C9E1;
+            --accent-soft: #E1EBF5;
+            --text-dark: #1A2B3C;
+            --text-muted: #5C6E80;
+            --border-light: #E1E8F0;
+            --shadow-soft: 0 10px 30px rgba(43, 95, 158, 0.05);
+            --shadow-hover: 0 15px 45px rgba(43, 95, 158, 0.1);
+            --sidebar-width: 320px;
+            --sidebar-collapsed-width: 60px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.8;
+            display: flex;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        /* Sidebar - Collapsible */
+        nav {
+            width: var(--sidebar-width);
+            background: var(--surface);
+            border-right: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 2.2rem 1.6rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.02);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        body.sidebar-collapsed nav {
+            width: var(--sidebar-collapsed-width);
+            padding: 2rem 0.5rem;
+        }
+
+        .nav-header {
+            color: var(--primary-royal);
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--primary-royal);
+            padding-left: 1.2rem;
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
+            font-weight: 700;
+        }
+
+        body.sidebar-collapsed .nav-header {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toggle-btn {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--primary-royal);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            align-self: flex-end;
+            transition: all 0.3s ease;
+        }
+
+        body.sidebar-collapsed .toggle-btn {
+            align-self: center;
+        }
+
+        nav ul {
+            list-style: none;
+            width: 100%;
+        }
+
+        nav ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        nav ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 1rem;
+            padding: 0.9rem 1.2rem;
+            display: flex;
+            align-items: center;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        nav ul li a:hover {
+            background: var(--accent-soft);
+            color: var(--primary-royal);
+        }
+
+        /* Main Content Area */
+        main {
+            flex: 1;
+            padding: 4rem 4%;
+            max-width: 1700px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding: 3.5rem 2rem;
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
+        }
+
+        .header-section h1 {
+            font-size: 3rem;
+            color: var(--primary-royal);
+            margin-bottom: 1.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .update-pill {
+            display: inline-block;
+            background: #E8F0F7;
+            color: var(--primary-royal);
+            padding: 6px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid #D0E0F0;
+        }
+
+        .step-block {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 3.5rem;
+            margin-bottom: 4rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .step-indicator {
+            font-size: 5rem;
+            color: var(--accent-soft);
+            position: absolute;
+            top: 10px;
+            right: 40px;
+            font-weight: 700;
+            opacity: 0.6;
+            z-index: 0;
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            color: var(--primary-royal);
+            font-weight: 700;
+            margin-bottom: 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Tools Grid Redesign */
+        .tools-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .tool-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary-royal);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-royal);
+        }
+
+        .tool-card.highlight::before {
+            background: linear-gradient(90deg, #2B5F9E, #5B89BA);
+            height: 6px;
+        }
+
+        .tool-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .tool-name {
+            font-weight: 700;
+            color: var(--primary-royal);
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .tool-link {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            word-break: break-all;
+            background: var(--bg-main);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .guide-card {
+            background: #F9FBFE;
+            padding: 2rem;
+            border-radius: 16px;
+            border-left: 5px solid var(--primary-royal);
+            margin-bottom: 2rem;
+        }
+
+        .guide-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .alert-box {
+            background: #FFF9F0;
+            border: 1px solid #FFE6C0;
+            color: #856404;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .pro-note {
+            background: var(--accent-soft);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            color: var(--primary-royal);
+            border-left: 5px solid var(--primary-royal);
+        }
+
+        .managed-list li {
+            padding-left: 3rem;
+            margin-bottom: 1.2rem;
+            list-style: none;
+            counter-increment: managed-counter;
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 32px;
+        }
+
+        .managed-list li::before {
+            content: counter(managed-counter);
+            position: absolute;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-royal);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .bold-text {
+            font-weight: 700;
+            color: var(--primary-royal);
+        }
+
+        .reply-method-card {
+            background: #FFFFFF;
+            border: 1px solid #E1EBF5;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            border-left: 6px solid var(--accent-sky);
+        }
+
+        .reply-icon {
+            font-size: 1.8rem;
+            color: var(--primary-royal);
+            background: var(--accent-soft);
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1200px) {
+            .tools-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+
+            nav {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1.2rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border-light);
+            }
+        }
+    </style>
+    <script>
+        function toggleSidebar() {
+            const body = document.body;
+            const icon = document.getElementById('toggle-icon');
+            body.classList.toggle('sidebar-collapsed');
+
+            if (body.classList.contains('sidebar-collapsed')) {
+                icon.innerText = '▶';
+            } else {
+                icon.innerText = '◀';
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <nav id="sidebar">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="切換選單">
+            <span id="toggle-icon">◀</span>
+        </button>
+        <div class="nav-header">TEAM SUPPORT<br>GUIDE</div>
+        <ul>
+            <li><a href="#tools"><span class="link-text">🔧 小幫手工具箱</span></a></li>
+            <li><a href="#guide"><span class="link-text">🌟 溫馨值日生指南</span></a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="header-section">
+            <h1 title="類神經小幫手 3.0 值班指南">類神經小幫手 3.0<br>值日生維運指南</h1>
+            <div class="update-pill">📅 最後更新日期：2026/06/17</div>
+        </div>
+
+        <!-- Tools Section -->
+        <section id="tools" class="step-block">
+            <div class="step-indicator">01</div>
+            <div class="step-title">🔧 常用小工具</div>
+
+            <div class="tools-container">
+                <!-- Highlighted Primary Tool -->
+                <a href="https://saleschat.aiii.ai/" target="_blank" class="tool-card highlight">
+                    <div class="tool-icon">💬</div>
+                    <div class="tool-name">Saleschat 管理後台</div>
+                    <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.95rem;">回覆所有群組與信件訊息的核心平台</p>
+                    <div class="tool-link">查看所有進線訊息</div>
+                </a>
+
+                <a href="https://docuguard.aiii.ai/view/m7M6VitAX0BqIFRuHs1N" target="_blank" class="tool-card">
+                    <div class="tool-icon">📘</div>
+                    <div class="tool-name">工單管理 SOP</div>
+                    <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.95rem;">確認是否AI有判別到Bug？請點擊前往查看
+                    </p>
+                    <div class="tool-link">前往線上文檔</div>
+                </a>
+
+                <div class="tool-card">
+                    <div class="tool-icon">📧</div>
+                    <div class="tool-name">類神經小幫手信件群組</div>
+                    <p style="margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.95rem;">查看是否有客戶進線訊息</p>
+                    <p style="margin-bottom: 1rem; color: #E74C3C; font-weight: 600; font-size: 0.85rem;">⚠️
+                        請協助確認是否有權限可以看到論壇信箱</p>
+                    <div class="tool-link">請至常用信箱確認</div>
+                </div>
+
+                <div class="tool-card" style="cursor: default;">
+                    <div class="tool-icon">📅</div>
+                    <div class="tool-name">值日生行事曆</div>
+                    <p style="margin-bottom: 1rem; color: #E74C3C; font-weight: 600; font-size: 0.95rem;">⚠️
+                        請確認是否有看到排班行事曆</p>
+                    <div class="tool-link">內部資源，僅限團隊</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guide Section -->
+        <section id="guide" class="step-block">
+            <div class="step-indicator">02</div>
+            <div class="step-title">🌟 值日生小指南</div>
+
+            <div class="pro-note">
+                <strong>☀️ 辛苦了！今日的小任務</strong>
+                <p style="margin-top: 10px;">如果您是今日值班的夥伴，再麻煩幫忙留意以下內容唷：</p>
+            </div>
+
+            <div class="guide-card">
+                <h4>💌 需協助回覆的範圍</h4>
+                <ul class="managed-list" style="margin-top: 15px;">
+                    <li>Saleschat 目前綁定的所有群組訊息</li>
+                    <li>類神經小幫手信件群組所收到的信</li>
+                </ul>
+            </div>
+
+            <!-- New Response Methods Section -->
+            <div class="guide-card" style="border-left-color: #5B89BA;">
+                <h4>⚡ 指定回覆方式</h4>
+                <div class="reply-method-card">
+                    <div class="reply-icon">🤖</div>
+                    <div>
+                        <strong style="color: var(--primary-royal); display: block; margin-bottom: 5px;">情境 1：已建立 Ticket
+                            的問題</strong>
+                        <p style="font-size: 0.95rem;">若該問題在工單管理中已建立 Ticket，請進入 <span class="bold-text">工單管理內層</span>，利用
+                            <span class="highlight-blue"
+                                style="background: #D1ECF1; padding: 2px 4px; border-radius: 4px;">AI 功能</span> 進行模擬與回覆。
+                        </p>
+                    </div>
+                </div>
+                <div class="reply-method-card" style="border-left-color: #A5C9E1;">
+                    <div class="reply-icon">💬</div>
+                    <div>
+                        <strong style="color: var(--primary-royal); display: block; margin-bottom: 5px;">情境 2：尚未建立
+                            Ticket 的問題</strong>
+                        <p style="font-size: 0.95rem;">若該問題尚未建立 Ticket，請直接於 <span class="bold-text">Saleschat
+                                管理後台</span> 進行回覆。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+                <div class="guide-card" style="border-left-color: #E74C3C;">
+                    <h4 style="color: #E74C3C;">🐛 發現 Bug 嗎？</h4>
+                    <p style="margin-top: 10px;">再麻煩小幫手幫忙處理：</p>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li>建立 <span class="bold-text" style="color: #E74C3C;">GitHub 工單</span></li>
+                        <li>通知負責該專案的 <span class="bold-text">PM</span> 與 <span class="bold-text">工程師</span> 夥伴</li>
+                    </ul>
+                </div>
+
+                <div class="guide-card" style="border-left-color: #3498DB;">
+                    <h4 style="color: #3498DB;">🔍 有資料查詢需求？</h4>
+                    <p style="margin-top: 10px;">麻煩幫忙確認一下是否可以直接回覆：</p>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li>若 <span class="bold-text">已知如何回覆</span>：請直接回覆客戶</li>
+                        <li>若 <span class="bold-text" style="color: #3498DB;">不確定回覆內容</span>：可以詢問負責該專案的 <span
+                                class="bold-text">AM</span> 夥伴唷</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert-box" style="margin-top: 3rem;">
+                📌 <strong>小提醒：</strong>值班期間請保持通訊暢通，確保能即時給予客戶溫暖的回應唷！
+            </div>
+        </section>
+
+        <footer>
+            &copy; 2026 類神經小幫手 3.0 維運團隊
+        </footer>
+    </main>
+
+</body>
+
+</html>
