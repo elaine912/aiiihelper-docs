@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端工單管理模組操作手冊</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #F4F7FA;
+            --surface: #FFFFFF;
+            --primary-royal: #2B5F9E;
+            --secondary-blue: #5B89BA;
+            --accent-sky: #A5C9E1;
+            --accent-soft: #E1EBF5;
+            --text-dark: #1A2B3C;
+            --text-muted: #5C6E80;
+            --border-light: #E1E8F0;
+            --shadow-soft: 0 10px 30px rgba(43, 95, 158, 0.05);
+            --shadow-hover: 0 15px 45px rgba(43, 95, 158, 0.1);
+            --sidebar-width: 320px;
+            --sidebar-collapsed-width: 60px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.8;
+            display: flex;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar - Collapsible */
+        nav {
+            width: var(--sidebar-width);
+            background: var(--surface);
+            border-right: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.02);
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+        }
+
+        body.sidebar-collapsed nav {
+            width: var(--sidebar-collapsed-width);
+            padding: 2rem 0.5rem;
+        }
+
+        .nav-header {
+            color: var(--primary-royal);
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--primary-royal);
+            padding-left: 1.2rem;
+            white-space: nowrap;
+            transition: opacity 0.2s ease;
+            font-weight: 700;
+        }
+
+        body.sidebar-collapsed .nav-header {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toggle-btn {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--primary-royal);
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            align-self: flex-end;
+            transition: all 0.3s ease;
+        }
+
+        body.sidebar-collapsed .toggle-btn {
+            align-self: center;
+        }
+
+        nav ul {
+            list-style: none;
+            width: 100%;
+        }
+
+        nav ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        nav ul li a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            padding: 0.9rem 1.2rem;
+            display: flex;
+            align-items: center;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        nav ul li a .link-text {
+            transition: opacity 0.2s ease;
+        }
+
+        body.sidebar-collapsed nav ul li a .link-text {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        nav ul li a:hover {
+            background: var(--accent-soft);
+            color: var(--primary-royal);
+        }
+
+        /* Main Content Area */
+        main {
+            flex: 1;
+            padding: 4rem 3%;
+            max-width: 1700px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        body.sidebar-collapsed main {
+            padding-left: 5%;
+            padding-right: 5%;
+            max-width: 1800px;
+        }
+
+        header {
+            margin-bottom: 4rem;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            color: var(--primary-royal);
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .step-block {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 3.5rem;
+            margin-bottom: 4rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+
+        .step-indicator {
+            font-size: 5rem;
+            color: var(--accent-soft);
+            position: absolute;
+            top: 10px;
+            right: 40px;
+            font-weight: 700;
+            opacity: 0.8;
+            z-index: 0;
+        }
+
+        .step-title {
+            font-size: 1.8rem;
+            color: var(--primary-royal);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .highlight-yellow {
+            background: #FFF3A3;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .highlight-green {
+            background: #D4EDDA;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .highlight-blue {
+            background: #D1ECF1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .bold-text {
+            font-weight: 700;
+            color: var(--primary-royal);
+        }
+
+        h4 {
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+        }
+
+        h4::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--primary-royal);
+            border-radius: 50%;
+        }
+
+        .ui-route {
+            background: #E8F0F7;
+            color: var(--primary-royal);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border: 1px solid #D0E0F0;
+            font-weight: 500;
+        }
+
+        .alert-box {
+            background: #FFF9F0;
+            border: 1px solid #FFE6C0;
+            color: #856404;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .pro-note {
+            background: var(--accent-soft);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            color: var(--primary-royal);
+            border-left: 5px solid var(--primary-royal);
+        }
+
+        .process-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .process-card {
+            background: #F9FBFE;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* User Flow Overview */
+        .user-flow-section {
+            margin-bottom: 4rem;
+        }
+
+        .flow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .flow-card {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            height: 160px;
+            justify-content: center;
+        }
+
+        .flow-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-royal);
+        }
+
+        .flow-card .flow-number {
+            font-size: 1.5rem;
+            color: var(--accent-sky);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .flow-card .flow-text {
+            font-weight: 600;
+            color: var(--primary-royal);
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        /* Config Cards */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .config-card {
+            background: var(--accent-soft);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-royal);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-height: 120px;
+        }
+
+        .config-card .config-label {
+            font-weight: 700;
+            color: var(--primary-royal);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .config-card .config-desc {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .badge-skippable {
+            background: #95A5A6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+
+        ul.check-list {
+            list-style: none;
+        }
+
+        ul.check-list li {
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        ul.check-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary-royal);
+            font-weight: bold;
+        }
+
+        .report-snippet {
+            background: #2C3E50;
+            color: #ECF0F1;
+            padding: 2rem;
+            border-radius: 12px;
+            line-height: 1.8;
+            margin: 1.5rem 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-right: 5px;
+        }
+
+        .badge-bug {
+            background: #E74C3C;
+            color: white;
+        }
+
+        .badge-confirm {
+            background: #3498DB;
+            color: white;
+        }
+
+        /* Managed List Styling */
+        .managed-list {
+            list-style: none;
+            counter-reset: managed-counter;
+            padding-left: 0;
+        }
+
+        .managed-list li {
+            counter-increment: managed-counter;
+            position: relative;
+            padding-left: 3rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            min-height: 32px;
+        }
+
+        .managed-list li::before {
+            content: counter(managed-counter);
+            position: absolute;
+            left: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-royal);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .card-line {
+            background: #F0FFF4 !important;
+            border-color: #C6F6D5 !important;
+            border-left: 5px solid #38A169 !important;
+        }
+
+        .card-line h4 {
+            color: #2F855A !important;
+        }
+
+        .card-line h4::before {
+            background: #38A169 !important;
+        }
+
+        .card-line li::before {
+            background: #38A169 !important;
+        }
+
+        .card-non-line {
+            background: #FAF5FF !important;
+            border-color: #E9D8FD !important;
+            border-left: 5px solid #805AD5 !important;
+        }
+
+        .card-non-line h4 {
+            color: #553C9A !important;
+        }
+
+        .card-non-line h4::before {
+            background: #805AD5 !important;
+        }
+
+        .card-non-line li::before {
+            background: #805AD5 !important;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
+        }
+
+        th,
+        td {
+            padding: 1.2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.9rem;
+        }
+
+        th {
+            background-color: var(--accent-soft);
+            color: var(--primary-royal);
+            font-weight: 700;
+        }
+
+        .table-label {
+            text-align: left;
+            font-weight: 700;
+            background-color: #F8FAFC;
+            min-width: 140px;
+        }
+
+        .status-o,
+        .status-x {
+            font-weight: 900;
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .status-o {
+            color: #28A745;
+        }
+
+        .status-x {
+            color: #E74C3C;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+
+            nav {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border-light);
+            }
+
+            body.sidebar-collapsed nav {
+                width: 100%;
+                height: auto;
+            }
+
+            .nav-header {
+                display: block;
+                opacity: 1;
+            }
+
+            .toggle-btn {
+                display: none;
+            }
+
+            .process-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script>
+        function toggleSidebar() {
+            const body = document.body;
+            const icon = document.getElementById('toggle-icon');
+            body.classList.toggle('sidebar-collapsed');
+
+            if (body.classList.contains('sidebar-collapsed')) {
+                icon.innerText = '▶';
+            } else {
+                icon.innerText = '◀';
+            }
+        }
+
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <nav id="sidebar">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="切換選單">
+            <span id="toggle-icon">◀</span>
+        </button>
+        <div class="nav-header">AM OPERATIONAL<br>MANUAL</div>
+        <ul>
+            <li><a href="#step1"><span class="link-text">Step 1. 基礎設定與連動</span></a></li>
+            <li><a href="#step2"><span class="link-text">Step 2. 人員身分識別</span></a></li>
+            <li><a href="#step3"><span class="link-text">Step 3. 訊息識別分類</span></a></li>
+            <li><a href="#step4"><span class="link-text">Step 4. GitHub 建單與同步</span></a></li>
+            <li><a href="#step5"><span class="link-text">Step 5. Google Chat 通報</span></a></li>
+            <li><a href="#step6"><span class="link-text">Step 6. 回覆排查結果</span></a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <header>
+            <h1>工單管理操作手冊</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">最後一次更新日期：2026/06/17</p>
+        </header>
+
+        <!-- User Flow Overview -->
+        <section class="user-flow-section">
+            <div class="step-title" style="margin-bottom: 1rem;">使用者流程總覽 (User Flow)</div>
+            <p>點擊下方卡片即可快速跳轉到想看的步驟唷：</p>
+            <div class="flow-grid">
+                <a href="#step1" class="flow-card">
+                    <div class="flow-number">Step 1</div>
+                    <div class="flow-text">基礎設定與連動</div>
+                </a>
+                <a href="#step2" class="flow-card">
+                    <div class="flow-number">Step 2</div>
+                    <div class="flow-text">人員身分識別</div>
+                </a>
+                <a href="#step3" class="flow-card">
+                    <div class="flow-number">Step 3</div>
+                    <div class="flow-text">訊息識別分類</div>
+                </a>
+                <a href="#step4" class="flow-card">
+                    <div class="flow-number">Step 4</div>
+                    <div class="flow-text">GitHub 建單同步</div>
+                </a>
+                <a href="#step5" class="flow-card">
+                    <div class="flow-number">Step 5</div>
+                    <div class="flow-text">Google Chat 通報</div>
+                </a>
+                <a href="#step6" class="flow-card">
+                    <div class="flow-number">Step 6</div>
+                    <div class="flow-text">回覆排查結果</div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Step 1 -->
+        <section id="step1" class="step-block">
+            <div class="step-indicator">01</div>
+            <div class="step-title">Step 1. 基礎設定與連動</div>
+            <p>在 <span class="bold-text">類神經小幫手 3.0</span> 裡，目前主要支援 <span class="highlight-blue">LINE 客服群組</span>
+                的功能唷。如果想讓 AI 類神經小幫手判斷 Bug 資訊，可以參考以下幾個小步驟：</p>
+
+            <div class="pro-note">
+                <strong>📌 新客戶開發/上線前置作業：</strong>
+                <ul style="margin-top: 10px; padding-left: 20px; list-style-type: decimal;">
+                    <li><span class="bold-text">如果是首次建立的客戶</span>，再麻煩將該客戶的<span class="highlight-yellow">群組名稱與對應的
+                            Repo</span> 提供給 <span class="bold-text">Elaine</span> 設定唷。若未完成此流程，AI無法順利判別訊息，也會找不到該群組唷。</li>
+                    <li>如果客戶需要<span class="highlight-green">類神經小幫手</span>的協助，請跟 <span class="bold-text">Elaine
+                            說</span>，會一起安排小幫手夥伴來協助唷。</li>
+                </ul>
+            </div>
+
+            <div class="process-grid">
+                <div class="process-card">
+                    <h4>情境：有 LINE 群組</h4>
+                    <ul class="check-list">
+                        <li>(a) 與客戶建立一個 <span class="highlight-yellow">LINE 群組</span>。</li>
+                        <li>(b) 邀請 <span class="bold-text">類神經小幫手 3.0</span> 加入群組。</li>
+                        <li>(c) 在群組內 <span class="highlight-yellow">Tag (標記) 小幫手</span>。</li>
+                        <li style="list-style: none; color: #D9534F; font-weight: 500; margin-top: 10px;">
+                            ⚠️ <span class="highlight-green">小提醒：目前官方帳號要透過手機版才能進行 Tag 唷。</span>
+                        </li>
+                    </ul>
+                    <div
+                        style="background: var(--bg-main); border-radius: 8px; padding: 1.2rem; margin-top: 1rem; font-size: 0.85rem; border-left: 4px solid var(--accent-sky);">
+                        <strong style="color: var(--primary-royal); display: block; margin-bottom: 8px;">📋
+                            欄位設定指引：</strong>
+                        <ul style="list-style: none; padding-left: 0; line-height: 1.6;">
+                            <li><span class="bold-text">1. Group ID *：</span>選擇指定的 LINE 群組</li>
+                            <li><span class="bold-text">2. 群名 (顯示用)：</span>與 LINE 群組名稱同名</li>
+                            <li><span class="bold-text">3. 客戶 customerCompany：</span>依照客戶名稱呈現 (例如：NNHCP)</li>
+                            <li><span class="bold-text">4. 專案名稱 projectName：</span>依照專案名稱 (例如：NNHCP)</li>
+                            <li><span class="bold-text">5. Tenant ID：</span>請輸入「tenant_aiii」</li>
+                            <li><span class="bold-text">6. Channel Type：</span>請選擇「line (LINE 群、webhook 自動建單)」</li>
+                            <li><span class="bold-text">7. Repos：</span>客製化 Repo 放置位置</li>
+                            <li><span class="bold-text">8. Modules：</span>點擊右側「多選 module」選取公版 Repo</li>
+                            <li><span class="bold-text">9. 主要 AM：</span>下拉選擇負責的 AM 名稱</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="process-card">
+                    <h4>情境：無 LINE 群組 (如：Email/Teams)</h4>
+                    <p>若客戶沒有加入 LINE 群組（例如透過 Email 或 Teams 回報 Bug），也可以走手動建單流程唷：</p>
+                    <ul class="check-list" style="margin-top: 1rem;">
+                        <li>(a) 參考上述步驟，先幫客戶創立一個 <span class="highlight-blue">模擬的虛擬 LINE 群組</span>。</li>
+                        <li>這步是為了讓手動建單時有虛擬模組可以選取，就能順利建立 Ticket 了。</li>
+                    </ul>
+                    <div
+                        style="background: var(--bg-main); border-radius: 8px; padding: 1.2rem; margin-top: 1rem; font-size: 0.85rem; border-left: 4px solid var(--secondary-blue);">
+                        <strong style="color: var(--primary-royal); display: block; margin-bottom: 8px;">📋
+                            欄位設定指引：</strong>
+                        <ul style="list-style: none; padding-left: 0; line-height: 1.6;">
+                            <li><span class="bold-text">1. 群名 (顯示用)：</span>建議以「客戶名稱 X 回報形式」命名 (例如：禮來 X E-mail)</li>
+                            <li><span class="bold-text">2. 客戶 customerCompany：</span>依照客戶名稱呈現 (例如：NNHCP)</li>
+                            <li><span class="bold-text">3. 專案名稱 projectName：</span>依照專案名稱 (例如：NNHCP)</li>
+                            <li><span class="bold-text">4. Tenant ID：</span>請輸入「tenant_aiii」</li>
+                            <li><span class="bold-text">5. Channel Type：</span>請選擇「teams (Teams 客戶)」或「manual (其他手動建)」
+                            </li>
+                            <li><span class="bold-text">6. Repos：</span>客製化 Repo 放置位置</li>
+                            <li><span class="bold-text">7. Modules：</span>點擊右側「多選 module」選取公版 Repo</li>
+                            <li><span class="bold-text">8. 主要 AM：</span>下拉選擇負責的 AM 名稱</li>
+                            <li><span class="bold-text">9. 勾選：</span>「📧 這是非 LINE 客戶 (Teams / E-mail / 手動建群)」</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h4>系統配置 (Configuration)</h4>
+            <p style="margin-bottom: 1rem;">操作路徑：<span class="ui-route">系統最左側列表 > Configuration</span></p>
+
+            <div class="config-grid">
+                <div class="config-card">
+                    <div class="config-label">Step A: 設定群組</div>
+                    <div class="config-desc">可以在這裡設定每個 LINE 群組，也能看到已經建立的名單唷。</div>
+                </div>
+                <div class="config-card">
+                    <div class="config-label">Step B: 對應 Repo</div>
+                    <div class="config-desc">往下滑動，就能看到每個群組對應的 Repo 囉。</div>
+                </div>
+                <div class="config-card">
+                    <div class="config-label">Step C: 團隊確認</div>
+                    <div class="config-desc">再麻煩與夥伴工程師確認一下專案對應的 Repo，並完成設定唷。</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Managed Groups List -->
+        <section class="step-block" style="background: #F8FAFC; border-color: #E2E8F0; padding: 2.5rem 3.5rem;">
+            <div class="step-title"
+                style="font-size: 1.5rem; color: var(--primary-royal); margin-bottom: 2rem; border-bottom: 2px solid var(--accent-soft); padding-bottom: 10px; display: inline-block;">
+                目前管轄名單</div>
+
+            <div class="process-grid">
+                <div class="process-card card-line">
+                    <h4>LINE 群組</h4>
+                    <ul class="managed-list" style="margin-top: 15px;">
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">Bayer x Aiii 維運群組</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Jo、PM：Julie、工程師：Taro
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">纖達日記PSP x 類神經</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Elaine、PM：Jessie、工程師：Bryant (Wegocare專案：Taro)
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">捷元 x 類神經</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Mina、PM：Julie、工程師：Ruby
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">MISA X Aiii類神經</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Elaine、PM和工程師：依模組找公版工程師
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">一錠除類神經系統操作</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Mina、PM：Julie、工程師：Jeff
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">傳智大講堂 X Aiii</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Elaine、PM和工程師：依模組找公版工程師
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">精技電腦xAiii類神經</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Elaine、PM和工程師：依模組找公版工程師
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">GHS x 類神經網路</span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    AM：Mina、PM：Julie、工程師：Jeff
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="process-card card-non-line">
+                    <h4>非 LINE 群組</h4>
+                    <ul class="managed-list" style="margin-top: 15px;">
+                        <li>
+                            <div>
+                                <span style="font-weight: 600;">禮來 E-mail 進線</span>
+                                <span
+                                    style="font-size: 0.9rem; color: var(--text-muted); display: block; margin-top: 4px; font-weight: normal;">
+                                    (工單管理虛擬群組名稱：台灣禮來Ｘ E-mail 回報)
+                                </span>
+                                <div
+                                    style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--accent-sky);">
+                                    BD：Jasmine、AM＆PM：Julie、工程師：Bryant
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 2 -->
+        <section id="step2" class="step-block">
+            <div class="step-indicator">02</div>
+            <div class="step-title">Step 2. 人員身分識別 <span class="badge-skippable">可略過</span></div>
+            <p>因為 AI 有時候還不太分得清楚誰是夥伴、誰是客戶，需要大家幫忙點點手協助一下唷。</p>
+
+            <h4>操作流程</h4>
+            <p>操作路徑：<span class="ui-route">左側選單 > Staff</span></p>
+            <ul class="check-list">
+                <li>(a) 如果客戶曾在群組溝通，或是有新夥伴加入，可以透過 <span class="highlight-yellow">Staff 功能</span> 看看曾經發言的人員。</li>
+                <li>(b) 確認身分後，如果是同事夥伴，別忘了按下 <span class="highlight-green">「加入」</span>，將他們加入我們的平臺系統唷。</li>
+            </ul>
+        </section>
+
+        <!-- Step 3 -->
+        <section id="step3" class="step-block">
+            <div class="step-indicator">03</div>
+            <div class="step-title">Step 3. 訊息識別分類</div>
+            <p>目前分為兩個小路徑唷：</p>
+
+            <div class="process-grid">
+                <div class="process-card">
+                    <h4>情境 1：LINE 群組 (已加入小幫手)</h4>
+                    <p>工單模組在什麼情況下會建立 Ticket 呢？主要有這兩種情境：</p>
+                    <ul class="check-list">
+                        <li>
+                            (a) 當客戶 <span class="highlight-yellow">Tag 小幫手</span> 的時候
+                            <div
+                                style="margin-left: 1.5rem; color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">
+                                備註：系統會在 LINE 群組自動幫你建工單唷
+                            </div>
+                        </li>
+                        <li>
+                            (b) 當 AI 透過機器學習判別內容有可能是 Bug 時
+                            <div
+                                style="margin-left: 1.5rem; color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">
+                                備註：如果想讓客戶看到追蹤狀況，可以到 Ticket 內頁點擊「🔔 推狀態卡片提醒」唷
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="pro-note">
+                        <strong>💡 如果是第二種「AI 判別」的情況，我們可以回到工單管理平臺來找該則訊息：</strong>
+                        <div style="margin-top: 10px; font-size: 0.95rem;">
+                            • 在 <span class="bold-text">第一頁內容</span> 先標示為 <span class="badge badge-bug">BUG</span>，陪 AI
+                            一起學習。<br>
+                            • 進入 <span class="bold-text">第二頁內頁</span> 後，將狀態標示為 <span class="badge badge-confirm">確認為 Bug
+                            </span>，系統就會幫你在 GitHub 建立 Issue 囉。
+                        </div>
+                    </div>
+                </div>
+                <div class="process-card">
+                    <h4>情境 2：手動建單流程</h4>
+                    <ul class="check-list">
+                        <li>(a) 進入工單管理模組，點擊右邊的 <span class="highlight-yellow">「手動建單」</span> 流程。</li>
+                        <li>(b) 選取在 Step 1 創立的虛擬模組，就能順利建立 Ticket 了。</li>
+                    </ul>
+                    <div class="alert-box">
+                        📌 <strong>溫馨提醒：</strong>剛建好時是一張 Ticket，尚未確認是 Bug。如果確認是 Bug，同樣要 <span
+                            class="highlight-green">進入內頁點選「確認為 Bug
+                            」</span>，才會正式通報到 GitHub 唷。
+                    </div>
+                </div>
+            </div>
+
+            <div class="pro-note"
+                style="margin-top: 2rem; border-left: 4px solid var(--accent-sky); padding: 1rem 1.5rem; display: flex; align-items: center; gap: 2rem;">
+                <div style="flex: 1;">
+                    <h5 style="color: var(--primary-royal); margin-bottom: 0.3rem; font-size: 1.1rem;">補充：工單判別 (第一層學習)
+                    </h5>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                        操作：<span class="ui-route">工單管理</span> > 針對訊息點選標籤，讓我們一起幫 AI 變得更聰明。
+                    </p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <span
+                        style="border: 1px solid var(--primary-royal); color: var(--primary-royal); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; background: white; box-shadow: 0 2px 5px rgba(43,95,158,0.1);">BUG</span>
+                    <span
+                        style="border: 1px solid var(--border-light); color: var(--text-muted); padding: 6px 16px; border-radius: 6px; font-size: 0.85rem; background: white;">諮詢</span>
+                    <span
+                        style="border: 1px solid var(--border-light); color: var(--text-muted); padding: 6px 16px; border-radius: 10px; font-size: 0.85rem; background: white;">非
+                        BUG</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Step 4 -->
+        <section id="step4" class="step-block">
+            <div class="step-indicator">04</div>
+            <div class="step-title">Step 4. GitHub 建單與同步</div>
+            <p>如果要建立 GitHub 工單，我們可以進入該則訊息的內頁來處理唷：</p>
+
+            <div class="alert-box" style="background: #E8F0FE; border-color: #B6D4FE; color: #084298;">
+                📌 <strong>小提醒：</strong>要在 Ticket 內頁將狀態標示為 <span class="badge badge-bug">🐛 是 bug</span> 系統才會自動建立 GitHub
+                單唷。
+            </div>
+
+            <h4>1. 建單流程</h4>
+            <ul class="check-list">
+                <li>(a) <span class="bold-text">確認內容：</span>在內層先檢查一下左側的 <span class="highlight-yellow">issue
+                        context</span> 內容是否正確。</li>
+                <li>(b) <span class="bold-text">標示狀態：</span>如果沒問題，就把狀態標示為 <span class="badge badge-bug">BUG</span> 吧。
+                </li>
+                <li>(c) <span class="bold-text">查看結果：</span>建立完成後，可以直接點擊連結跳到 GitHub 看看唷。</li>
+            </ul>
+
+            <h4>2. 編輯與同步</h4>
+            <p>如果發現內容需要微調，可以回到工單內層下方的 <span class="ui-route">bug report</span> 欄位進行編輯，資料會 <span
+                    class="highlight-green">自動同步到 GitHub 上</span> 唷。</p>
+
+            <div class="pro-note">
+                📌 <span class="highlight-yellow">到 GitHub 之後：</span>再麻煩將對應的 PM 與工程師夥伴填寫在 <span
+                    class="bold-text">Assignees</span> 欄位唷。
+            </div>
+        </section>
+
+        <!-- Step 5 -->
+        <section id="step5" class="step-block">
+            <div class="step-indicator">05</div>
+            <div class="step-title">Step 5. Google Chat 通報</div>
+            <p>GitHub 建立好並確認內容無誤後，再麻煩大家透過 Google Chat，依照目前的格式回報到 <span class="bold-text">Bug 回報區</span> 唷。</p>
+
+            <p>填單的小內容依序如下：</p>
+            <div class="report-snippet">
+                <ul style="list-style: none; padding-left: 0;">
+                    <li>1. 客戶名稱＋站臺：</li>
+                    <li>2. 回報類型：</li>
+                    <li>3. Bug 等級：</li>
+                    <li>4. 是否為客製：</li>
+                    <li>5. 模組：</li>
+                    <li>6. 是否為急件：</li>
+                    <li>7. 情境說明：</li>
+                    <li>8. GitHub連結：</li>
+                </ul>
+                <br>
+                (填完後附上 GitHub 連結，讓 PM 與工程師夥伴能更快了解狀況唷)
+            </div>
+        </section>
+
+        <!-- Step 6 -->
+        <section id="step6" class="step-block">
+            <div class="step-indicator">06</div>
+            <div class="step-title">Step 6. 回覆排查結果</div>
+            <p>當夥伴工程師確認完狀況後，會在 GitHub 回覆排查結果。<br>
+                大家除了會收到信件通知，也可以回到 GitHub 關心一下結果，並將 <span class="highlight-green">Issue 的狀態標記為 Done</span> 唷。
+            </p>
+
+            <div class="process-grid">
+                <div class="process-card">
+                    <h4>情境 1：非 LINE 管道 (如 Email)</h4>
+                    <ul class="check-list">
+                        <li>(a) 透過原管道 (如信件) 回覆給客戶。</li>
+                        <li>(b) 回到工單系統，將狀態改為 <span class="highlight-blue">「已結案」</span>，讓這筆工單有個完美的 Ending 唷。</li>
+                    </ul>
+                </div>
+                <div class="process-card">
+                    <h4>情境 2：LINE 群組管道</h4>
+                    <p>若是透過 LINE 群組追蹤的工單，可以參考以下流程唷：</p>
+                    <ul class="check-list">
+                        <li>(a) 將 GitHub 的 Issue status 改為 <span class="highlight-green">Done</span>。</li>
+                        <li>(b) 可以利用右上角的 <span class="bold-text">「AI 建議回覆」</span> 幫忙擬稿，確認後再用 <span class="bold-text">「💬
+                                回覆 LINE 群組」</span> 傳送給客戶唷。</li>
+                        <li style="list-style: none; padding-left: 2rem;">
+                            - 如果覺得自己回覆的內容很棒想讓 AI 學習，可以點選訊息旁的 <span class="bold-text">星星 (⭐)</span> 唷。
+                        </li>
+                        <li>(c) 最後記得將 Ticket 狀態改為 <span class="highlight-blue">「已結案」</span> 唷。</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert-box"
+                style="background: #FFF5F5; border-color: #FEB2B2; color: #C53030; font-weight: bold;">
+                ⚠️ <strong>溫馨小提醒：</strong>無論是否為 Bug，建立的 Ticket 完成後都再麻煩改成「已結案」唷，這樣下次客戶有新需求才不會被誤判為同一筆單。
+            </div>
+
+            <h4>訊息對照表</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="background-color: var(--primary-royal); color: white;">接收/查看平台</th>
+                        <th colspan="4" style="background-color: var(--secondary-blue); color: white;">訊息傳送來源</th>
+                    </tr>
+                    <tr>
+                        <th>Saleschat</th>
+                        <th>原生 LINE OA</th>
+                        <th>工單管理</th>
+                        <th>個人帳戶回覆</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="table-label">Saleschat</td>
+                        <td>-</td>
+                        <td><span class="status-x">X</span>無法查看傳送的訊息</td>
+                        <td><span class="status-x">X</span>無法查看傳送的訊息</td>
+                        <td><span class="status-o">O</span>可以查看傳送的訊息</td>
+                    </tr>
+                    <tr>
+                        <td class="table-label">原生 LINE OA</td>
+                        <td><span class="status-o">O</span>可以查看傳送的訊息</td>
+                        <td>-</td>
+                        <td><span class="status-o">O</span>可以查看傳送的訊息</td>
+                        <td><span class="status-o">O</span>可以查看傳送的訊息</td>
+                    </tr>
+                    <tr>
+                        <td class="table-label">工單管理</td>
+                        <td><span class="status-o">O</span>可以看到傳送的訊息</td>
+                        <td><span class="status-x">X</span>無法看到傳送的訊息</td>
+                        <td>-</td>
+                        <td><span class="status-o">O</span>可以看到傳送的訊息</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <footer>
+            &copy; 2026 前端工單管理模組操作手冊
+        </footer>
+    </main>
+
+</body>
+
+</html>
